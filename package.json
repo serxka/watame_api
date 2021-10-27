@@ -1,0 +1,17 @@
+{
+	"name": "watame",
+	"version": "0.1.4",
+	"description": "",
+	"main": "dist/index.js",
+	"scripts": {
+		"run": "tsc",
+		"build": "tsc --project .",
+		"format": "npx prettier --write ./src"
+	},
+	"devDependencies": {
+		"typescript": "^4.4.4",
+		"prettier": "2.4.1"
+	},
+	"author": "serxka",
+	"license": "MIT"
+}
