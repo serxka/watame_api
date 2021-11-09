@@ -6,6 +6,7 @@ interface Client {
 
 	getHeaders: (json?: boolean) => Headers;
 	handleError: (res: Response) => void;
+
 	getPostById: (id: number) => Promise<Post>;
 	searchPosts: (
 		tags: string[],
@@ -18,6 +19,9 @@ interface Client {
 		image: Blob,
 		name: string
 	) => Promise<PostPartial>;
+
+	getImagePath: (post: Post) => string;
+	getThumbnailPath: (post: Post) => string;
 }
 
 function clientMethods(): Client {
@@ -92,6 +96,12 @@ function clientMethods(): Client {
 			this.handleError(res);
 
 			return (await res.json()) as PostPartial;
+		},
+		getImagePath: function (p: Post): string {
+			return `${this.url}/s/img/${p.path}/${p.id}-${p.filename}`;
+		},
+		getThumbnailPath: function (p: Post): string {
+			return `${this.url}/s/tmb/${p.path}/${p.id}.jpg`;
 		},
 	};
 }
