@@ -41,5 +41,45 @@ enum PostSorting {
 	VoteDescending = "vd",
 }
 
-export { PostSorting, Rating };
-export type { Post, PostPartial, UploadPost };
+enum Permissions {
+	Guest = "Guest",
+	User = "User",
+	Moderator = "Moderator",
+	Admin = "Admin",
+}
+
+interface User {
+	id: number;
+	name: string;
+	email?: string;
+	picture: string;
+	perms: Permissions;
+}
+
+enum ErrorType {
+	InternalError,
+	BadData,
+	Timeout,
+	Unauthorized,
+	PayloadSize,
+	UnsupportedType,
+	TagsLimit,
+	BadTagCharacters,
+	PageSizeLimit,
+	UserExisits,
+	BadPassword,
+	BadCredentidals,
+	Unknown,
+}
+
+class APIError extends Error {
+	err: ErrorType;
+
+	constructor(err: any) {
+		super("API Error");
+		this.err = err;
+	}
+}
+
+export { PostSorting, Rating, Permissions, APIError, ErrorType };
+export type { Post, PostPartial, UploadPost, User };

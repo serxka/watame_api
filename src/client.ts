@@ -1,12 +1,26 @@
-import { Post, PostPartial, PostSorting, UploadPost } from "./types";
+import {
+	Post,
+	PostPartial,
+	PostSorting,
+	UploadPost,
+	User,
+	APIError,
+	ErrorType,
+} from "./types";
 
 interface Client {
 	url: string;
 	token: string | null;
 
 	getHeaders: (json?: boolean) => Headers;
-	handleError: (res: Response) => void;
+	handleError: (res: Response) => Promise<void>;
 
+	register: (
+		username: string,
+		password: string,
+		email: string
+	) => Promise<User>;
+	login: (username: string, password: string) => Promise<void>;
 	getPostById: (id: number) => Promise<Post>;
 	searchPosts: (
 		tags: string[],
@@ -37,16 +51,97 @@ function clientMethods(): Client {
 
 			return headers;
 		},
-		// TODO: custom error type and match API specific error
-		handleError: function (res: Response) {
-			switch (res.status) {
-				case 400:
-					throw new Error("bad request");
+
+		handleError: async function (res: Response): Promise<void> {
+			// If there is no error return early
+			if (res.status === 200) return;
+			const msg = await res.json();
+			let err: ErrorType = ErrorType.Unknown;
+			switch (msg.error) {
+				case "internal server error":
+					err = ErrorType.InternalError;
 					break;
-				case 500:
-					throw new Error("internal server error");
+				case "bad request":
+					err = ErrorType.BadData;
+					break;
+				case "timeout":
+					err = ErrorType.Timeout;
+					break;
+				case "unauthorised":
+					err = ErrorType.Unauthorized;
+					break;
+				case "payload to large":
+					err = ErrorType.PayloadSize;
+					break;
+				case "unsupported mime type":
+					err = ErrorType.UnsupportedType;
+					break;
+				case "too many tags, please reduce amount":
+					err = ErrorType.TagsLimit;
+					break;
+				case "one or more tags contained invalid characters":
+					err = ErrorType.BadTagCharacters;
+					break;
+				case "too many items per page, please reduce amount":
+					err = ErrorType.PageSizeLimit;
+					break;
+				case "account details have already been used":
+					err = ErrorType.UserExisits;
+					break;
+				case "password is too weak":
+					err = ErrorType.BadPassword;
+					break;
+				case "password or username where not correct":
+					err = ErrorType.BadCredentidals;
+					break;
+				default:
+					err = ErrorType.Unknown;
 					break;
 			}
+			throw new APIError(err);
+		},
+
+		register: async function (
+			username: string,
+			password: string,
+			email: string
+		): Promise<User> {
+			let body = {
+				user: username,
+				pass: password,
+				email: email,
+			};
+			const init: any = {
+				method: "POST",
+				body,
+			};
+			const res = await fetch(`${this.url}/register`, init);
+			await this.handleError(res);
+
+			return (await res.json()) as User;
+		},
+
+		login: async function (
+			username: string,
+			password: string
+		): Promise<void> {
+			let body = {
+				user: username,
+				pass: password,
+			};
+			const init: any = {
+				method: "POST",
+				body,
+			};
+			const res = await fetch(`${this.url}/login`, init);
+			await this.handleError(res);
+
+			let r = await res.json();
+			this.token = r.token;
+
+			return new Promise((resolve, _) => {
+				resolve();
+			});
 		},
 
 		getPostById: async function (this: Client, id: number): Promise<Post> {
@@ -55,7 +150,7 @@ function clientMethods(): Client {
 				method: "GET",
 				headers,
 			});
-			this.handleError(res);
+			await this.handleError(res);
 
 			return (await res.json()) as Post;
 		},
@@ -72,7 +167,7 @@ function clientMethods(): Client {
 				`${this.url}/search?t=${enc}&p=${page}&l=${limit}&s=${sorting}`,
 				{ method: "GET", headers }
 			);
-			this.handleError(res);
+			await this.handleError(res);
 
 			return (await res.json()) as Post[];
 		},
@@ -93,7 +188,7 @@ function clientMethods(): Client {
 				body: form,
 			};
 			const res = await fetch(`${this.url}/post`, init);
-			this.handleError(res);
+			await this.handleError(res);
 
 			return (await res.json()) as PostPartial;
 		},

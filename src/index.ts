@@ -1,5 +1,12 @@
 import { Client, clientMethods } from "./client";
-import { Post, PostPartial } from "./types";
+import {
+	Post,
+	PostPartial,
+	APIError,
+	ErrorType,
+	User,
+	Permissions,
+} from "./types";
 
 async function client_login_password(
 	root: string,
@@ -83,4 +90,12 @@ const Watame = {
 };
 
 export default Watame;
-export type { Client, Post as IPost, PostPartial as IPostPartial };
+export type {
+	Client,
+	Post as IPost,
+	PostPartial as IPostPartial,
+	APIError,
+	ErrorType,
+	User as IUser,
+	Permissions,
+};
