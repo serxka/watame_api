@@ -90,12 +90,11 @@ const Watame = {
 };
 
 export default Watame;
+export { APIError, ErrorType };
 export type {
 	Client,
 	Post as IPost,
 	PostPartial as IPostPartial,
-	APIError,
-	ErrorType,
 	User as IUser,
 	Permissions,
 };

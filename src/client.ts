@@ -85,6 +85,9 @@ function clientMethods(): Client {
 				case "too many items per page, please reduce amount":
 					err = ErrorType.PageSizeLimit;
 					break;
+				case "no posts found":
+					err = ErrorType.NoPostsFound;
+					break;
 				case "account details have already been used":
 					err = ErrorType.UserExisits;
 					break;

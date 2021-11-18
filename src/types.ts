@@ -66,6 +66,7 @@ enum ErrorType {
 	TagsLimit,
 	BadTagCharacters,
 	PageSizeLimit,
+	NoPostsFound,
 	UserExisits,
 	BadPassword,
 	BadCredentidals,
